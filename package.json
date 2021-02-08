@@ -1,0 +1,19 @@
+{
+  "name": "phonebookbackend",
+  "version": "1.0.0",
+  "description": "part 3 exercise of fullstackopen course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AwaisIsane/Full-stack-open-part3.git"
+  },
+  "author": "Awais Isane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AwaisIsane/Full-stack-open-part3/issues"
+  },
+  "homepage": "https://github.com/AwaisIsane/Full-stack-open-part3#readme"
+}
