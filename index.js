@@ -1,16 +1,20 @@
 const { response } = require('express');
 const express = require('express');
+const cors = require('cors')
+
 const app = express();
+
 const morgan = require('morgan');
 
-morgan.token('type', function (req, res) { 
+morgan.token('content', function (req, res) { 
   return JSON.stringify(req.body) })
 
-const logger = morgan(':method :url :status :res[content-length] - :response-time ms :type',
+const logger = morgan(':method :url :status :res[content-length] - :response-time ms :content',
 {
   skip: (req,res) => {
     return req.method !== "POST"}
 });
+app.use(cors())
 
 app.use(logger);
 
