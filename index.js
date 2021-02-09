@@ -15,7 +15,7 @@ const logger = morgan(':method :url :status :res[content-length] - :response-tim
     return req.method !== "POST"}
 });
 app.use(cors())
-
+app.use(express.static('build'))
 app.use(logger);
 
 
