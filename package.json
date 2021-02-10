@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf build && cd /home/userawais/projects/Fullstackex/part2/phonebook && npm run build --prod && cp -r build /home/userawais/projects/Fullstackex-part3/",
     "deploy": "git push heroku main",
-    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",    
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
     "logs:prod": "heroku logs --tail"
   },
   "repository": {
@@ -24,7 +24,9 @@
   "homepage": "https://github.com/AwaisIsane/Full-stack-open-part3#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "mongoose": "^5.11.15",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
