@@ -18,51 +18,53 @@ const logger = morgan(':method :url :status :res[content-length] - :response-tim
 });
 app.use(cors())
 app.use(express.static('build'))
+app.use(express.json());
 app.use(logger);
 
 
-app.use(express.json());
+
 
 
 app.get("/api/persons",(req,res)  => {
     Person.find({}).then(result => {
-    console.log("phonebook:")
-    result.forEach(note => {
-    console.log(`${note.name} ${note.number}`)
-    })
+  //  console.log("phonebook:")
+ //   result.forEach(note => {
+   // console.log(`${note.name} ${note.number}`)
+   // })
     res.json(result)
-
-
   })
 })
 
-app.get("/api/persons/:id", (req,res) => {
+app.get("/api/persons/:id", (req,res,next) => {
   Person.findById(req.params.id)
   .then(per => {
+    if (per) {
     res.json(per)
   }
-  )
-  .catch(err => {
+  else {
     res.status(404).end()
-    console.log("err",err)})
+  }
+  })
+  .catch(err => next(err))
 })
 
 app.get("/info",(req,res) => {
-    const strtosen = `<p>Phonebook has info of ${persons.length} people
+    Person.countDocuments({}, (err,count) => {
+    const strtosen = `<p>Phonebook has info of ${count} people
     </p> ${new Date().toString()}`
     res.send(strtosen)
+    })
 }
 )
-
-app.delete("/api/persons/:id", (req,res) => {
-  Person.deleteOne({id:req.params.id})
+//after deletion no changses in front end
+app.delete("/api/persons/:id", (req,res,next) => {
+  Person.findByIdAndRemove(req.params.id)
+  .then(result => {
   res.status(204).end()
 })
+.catch(err => next(err))
+})
 
-const genrateId = () => {
-  return  Math.floor(Math.random() * Math.floor(10000));
-
-}
 app.post("/api/persons" , (req,res) => {
   const body = req.body
   if (!body||!body.name || !body.number) {
@@ -83,18 +85,51 @@ app.post("/api/persons" , (req,res) => {
   })
 
   person.save().then(per => {
-    console.log(`added ${per.name} number ${per.number} to phonebook`)
     res.json(per)
   })
+  .catch((err)=>next(err))
 
 })
+
+app.put("/api/persons/:id" , (req,res,next) => {
+ const body = req.body
+
+ const person = {
+  name:body.name,
+  number:body.number,
+}
+Person.findByIdAndUpdate(req.params.id,person,{new:true})
+  .then(updatedPerson =>
+    res.json(updatedPerson))
+    .catch(err =>next(err))
+})
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint)
+
+
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+  console.log(error.name)
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-process.on('SIGINT', function() {
+process.on('SIGTERM', function() {
   mongoose.connection.close(function () {
     console.log('Mongoose disconnected on app termination');
     process.exit(0);
