@@ -19,7 +19,7 @@ const logger = morgan(':method :url :status :res[content-length] - :response-tim
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json());
-app.use(logger);
+//app.use(logger);
 
 
 
@@ -27,10 +27,6 @@ app.use(logger);
 
 app.get("/api/persons",(req,res)  => {
     Person.find({}).then(result => {
-  //  console.log("phonebook:")
- //   result.forEach(note => {
-   // console.log(`${note.name} ${note.number}`)
-   // })
     res.json(result)
   })
 })
@@ -65,20 +61,14 @@ app.delete("/api/persons/:id", (req,res,next) => {
 .catch(err => next(err))
 })
 
-app.post("/api/persons" , (req,res) => {
+app.post("/api/persons" , (req,res,next) => {
   const body = req.body
   if (!body||!body.name || !body.number) {
     return res.status(400).json({ 
       error: 'content missing' 
     })
   }
-/*
-  if (persons.filter(per => per.name===body.name).length!==0) {
-    return res.status(400).json({ 
-      error: 'name must be unique' 
-    })
-  }
-*/
+
   const person = new Person({
     name:body.name,
     number:body.number,
@@ -93,19 +83,21 @@ app.post("/api/persons" , (req,res) => {
 
 app.put("/api/persons/:id" , (req,res,next) => {
  const body = req.body
-
+  const id = body.id
  const person = {
-  name:body.name,
+  //name:body.name,
   number:body.number,
 }
-Person.findByIdAndUpdate(req.params.id,person,{new:true})
-  .then(updatedPerson =>
-    res.json(updatedPerson))
-    .catch(err =>next(err))
+Person.findByIdAndUpdate(id,person,{new:true,runValidators:true})
+  .then(updatedPerson =>  {
+    if (!updatedPerson) res.status(400).json({ error: "notPresent"}) //in case person not pres
+    else res.json(updatedPerson)})
+    .catch(err =>{
+      next(err)})
 })
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
 }
 
 // handler of requests with unknown endpoint
@@ -117,19 +109,24 @@ const errorHandler = (error, req, res, next) => {
   console.log(error.name)
   if (error.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' })
-  } 
+  }
+  
+  else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message})
+  }
 
   next(error)
 }
 
 app.use(errorHandler)
+app.use(logger);
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-process.on('SIGTERM', function() {
+process.on('SIGINT', function() {
   mongoose.connection.close(function () {
     console.log('Mongoose disconnected on app termination');
     process.exit(0);
