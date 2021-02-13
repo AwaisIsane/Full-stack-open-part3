@@ -21,7 +21,7 @@ const logger = morgan(":method :url :status :res[content-length] - :response-tim
 app.use(cors());
 app.use(express.static("build"));
 app.use(express.json());
-//app.use(logger);
+app.use(logger);
 
 
 
@@ -120,16 +120,8 @@ const errorHandler = (error, req, res, next) => {
 };
 
 app.use(errorHandler);
-app.use(logger);
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-process.on("SIGINT", function() {
-  mongoose.connection.close(function () {
-    console.log("Mongoose disconnected on app termination");
-    process.exit(0);
-  });
-});
