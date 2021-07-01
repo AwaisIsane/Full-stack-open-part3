@@ -8,7 +8,7 @@ if (process.argv.length < 3) {
 const password = process.argv[2];
 
 const url = 
-    `mongodb+srv://fullstack:${password}@freestackopensandbox.1k2bw.mongodb.net/phonebook-app?retryWrites=true&w=majority`;
+    `process url heree`;
 
 mongoose.connect(url , {useNewUrlParser:true , useUnifiedTopology : true,useFindAndModify: false,useCreateIndex:true});
 
